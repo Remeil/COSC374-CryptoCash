@@ -23,7 +23,7 @@ public class Customer {
 
 	}
 
-	public static void unblindMoneyOrder(int orderToUnblind) {
+	public static void unblindMoneyOrder() {
 
 	}
 

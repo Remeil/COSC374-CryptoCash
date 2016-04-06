@@ -5,9 +5,9 @@
  * A file that does stuff.
  */
 public class Bank {
-	public long publicKey = 1;
-	private long privateKey = 1;
-	public long modulus = 1;
+	public static long publicKey = 1;
+	private static long privateKey = 1;
+	public static long modulus = 1;
 
 	private Bank() {
 
@@ -25,6 +25,8 @@ public class Bank {
 		return true;
 	}
 
+	//probably need to return more than a boolean here, to tell between
+	//merchant cheating and customer cheating
 	public static boolean verifyMerchantMoneyOrder() {
 		return true;
 	}

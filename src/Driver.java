@@ -10,6 +10,8 @@ public class Driver {
 	public static void main(String[] args) {
 		boolean done = false;
 		Scanner scan = new Scanner(System.in);
+		int lastNumberOfOrders = -1;
+		String lastIdentityString = "";
 
 		do {
 			//Menu stuff
@@ -27,7 +29,7 @@ public class Driver {
 			System.out.println("11) Exit");
 
 			int input = -1;
-			int lastNumberOfOrders = -1;
+			
 			do {
 				try {
 					System.out.print("Enter Selection: ");
@@ -99,32 +101,55 @@ public class Driver {
 						catch (InputMismatchException e) {}
 					} while (orderToSign < -1 && confirmed);
 					
-					System.out.println("Verifying and signing money order " + orderToSign + ".");
+					System.out.println("Verifying and signing money order " + orderToSign + "...");
 					if (Bank.verifyAndSignMoneyOrders(orderToSign)) {
-						
+						System.out.println("Money order signed.");
 					} else {
-						
+						System.out.println("ERROR: Invalid money order.");
 					}
 					break;
 				}
 				//Unblind money orders
 				case 4: {
+					System.out.println("Unblinding money order...");
+					Customer.unblindMoneyOrder();
+					System.out.println("Money order unblinded.");
 					break;
 				}
 				//Verify bank signature
 				case 5: {
+					System.out.println("Verifying bank signature...");
+					if (Merchant.verifyBankSignature(Bank.publicKey, Bank.modulus)) {
+						System.out.println("Bank signature appears to be valid.");
+					}
+					else {
+						System.out.println("ERROR: Bank signature appears to be invalid");
+					}
 					break;
 				}
 				//Request identity halves
 				case 6: {
+					System.out.println("Generating identity reveal string...");
+					lastIdentityString = Merchant.generateRevealIdentityString(lastNumberOfOrders);
+					System.out.println("Generated string: " + lastIdentityString);
 					break;
 				}
 				//Reveal identity halves
 				case 7: {
+					System.out.println("Revealing identity halves...");
+					Customer.revealIdentityStringHalves(lastIdentityString);
+					System.out.println("Identity halves revealed.");
 					break;
 				}
 				//Verify payment
 				case 8: {
+					System.out.println("Verifying payment...");
+					if (Bank.verifyMerchantMoneyOrder()) {
+						System.out.println("Payment verified.");
+					}
+					else {
+						System.out.println("ERROR: Payment is invalid");
+					}
 					break;
 				}
 				//Automatic
