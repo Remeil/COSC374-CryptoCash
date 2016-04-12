@@ -1,3 +1,4 @@
+import java.io.IOException;
 import java.util.*;
 
 /*
@@ -70,7 +71,11 @@ public class Driver {
 					} while (identity < 0);
 
 					System.out.println("Creating money orders...");
-					Customer.createMoneyOrders(amount, ordersToCreate, identity);
+					try {
+						Customer.createMoneyOrders(amount, ordersToCreate, identity);
+					} catch (IOException e) {
+						System.out.println("Error creating money orders.");
+					}
 					System.out.println("Done creating money orders.");
 					lastNumberOfOrders = ordersToCreate;
 					break;
@@ -158,7 +163,7 @@ public class Driver {
 				}
 				//Seed PRNGs
 				case 10: {
-
+					
 					break;
 				}
 				//Exit
