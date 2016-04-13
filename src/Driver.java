@@ -178,5 +178,7 @@ public class Driver {
 			
 			System.out.println();
 		} while (!done);
+		
+		scan.close();
 	}
 }
