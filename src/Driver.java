@@ -146,7 +146,7 @@ public class Driver {
 				//Reveal identity halves
 				case 7: {
 					System.out.println("Revealing identity halves...");
-					Customer.revealIdentityStringHalves(lastIdentityString);
+					List<Customer.RevealedIdentityStrings> pairs = Customer.revealIdentityStringHalves(lastIdentityString);
 					System.out.println("Identity halves revealed.");
 					break;
 				}

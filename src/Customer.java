@@ -14,6 +14,7 @@ public class Customer {
 	private static String blindedMoneyOrderDirectory = "blindedMoneyOrders/";
 	private static String signedMoneyOrderDirectory = "signedMoneyOrder/";
 	private static Random rand = new Random();
+	private static long lastSecret = 0;
 
 	private Customer() {
 
@@ -68,7 +69,8 @@ public class Customer {
 
 	public static void blindMoneyOrders() throws IOException {
 		File[] moneyOrders = new File(moneyOrderDirectory).listFiles();
-		long multiplier = Common.powermod(rand.nextLong(), Bank.publicKey, Bank.modulus);
+		lastSecret = rand.nextLong();
+		long multiplier = Common.powermod(lastSecret, Bank.publicKey, Bank.modulus);
 		
 		for (File moneyOrder : moneyOrders) {
 			List<String> moneyOrderLines = Files.readAllLines(Paths.get(moneyOrder.getAbsolutePath()));
@@ -98,11 +100,23 @@ public class Customer {
 		}
 	}
 
+	public static void unblindMoneyOrder(long moneyOrder) {
+		
+	}
+	
 	public static void unblindMoneyOrder() {
-
+		
+	}
+	
+	public class RevealedIdentityStrings
+	{
+		public long hashResult;
+		public long secret;
+		public long randomValue1;
+		public long randomValue2;
 	}
 
-	public static List<Long> revealIdentityStringHalves(String halvesToReveal) {
-		return new LinkedList<Long>();
+	public static List<RevealedIdentityStrings> revealIdentityStringHalves(String halvesToReveal) {
+		return new LinkedList<RevealedIdentityStrings>();
 	}
 }
