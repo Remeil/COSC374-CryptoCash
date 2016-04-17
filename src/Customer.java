@@ -5,17 +5,17 @@ import java.util.*;
 
 /*
  * Customer.java
- * Author(s): 
+ * Author(s): Johnathan Stiles
  * 
- * A file that does stuff.
+ * This class provides all the money order operations from the customer.
  */
 public class Customer {
-	private static String moneyOrderDirectory = "moneyOrders/";
-	private static String blindedMoneyOrderDirectory = "blindedMoneyOrders/";
-	private static String unblindedMoneyOrderDirectory = "unblindedMoneyOrders/";
-	private static String signedMoneyOrderDirectory = "signedMoneyOrder/";
-	private static String unblindedSignedMoneyOrderDirectory = "unblindedSignedMoneyOrder/";
-	private static String randomNumberDirectory = "savedRandomNumbers/";
+	private final static String MONEY_ORDER_DIRECTORY = "moneyOrders/";
+	private final static String BLINDED_MONEY_ORDER_DIRECTORY = "blindedMoneyOrders/";
+	private final static String UNBLINDED_MONEY_ORDER_DIRECTORY = "unblindedMoneyOrders/";
+	private final static String SIGNED_MONEY_ORDER_DIRECTORY = "signedMoneyOrder/";
+	private final static String UNBLINDED_SIGNED_MONEY_ORDER_DIRECTORY = "unblindedSignedMoneyOrder/";
+	private final static String RANDOM_NUMBER_DIRECTORY = "savedRandomNumbers/";
 	private static Random rand = new Random();
 	private static long lastSecret = 0;
 
@@ -23,11 +23,15 @@ public class Customer {
 
 	}
 
+	//Set the seed
 	public static void seedPrng(long seed) {
 		rand.setSeed(seed);
 	}
 
+	
 	public static void createMoneyOrders(double amount, int ordersToCreate, long identity) throws IOException {
+		clearAllFiles();
+		
 		for (int i = 1; i <= ordersToCreate; i++) {
 			String fileContents = "";
 
@@ -38,8 +42,33 @@ public class Customer {
 			//identity strings
 			fileContents += generateIdentityStrings(ordersToCreate, identity, i + "MO.txt");
 
-			Path filePath = Paths.get(moneyOrderDirectory + i + "MO.txt");
+			Path filePath = Paths.get(MONEY_ORDER_DIRECTORY + i + "MO.txt");
 			Files.write(filePath, fileContents.getBytes());
+		}
+	}
+
+	private static void clearAllFiles() throws IOException {
+		File moneyOrderDirectory = new File(MONEY_ORDER_DIRECTORY);
+		File blindedMoneyOrderDirectory = new File(BLINDED_MONEY_ORDER_DIRECTORY);
+		File unblindedMoneyOrderDirectory = new File(UNBLINDED_MONEY_ORDER_DIRECTORY);
+		File signedMoneyOrderDirectory = new File(SIGNED_MONEY_ORDER_DIRECTORY);
+		File unblindedSignedMoneyOrderDirectory = new File(UNBLINDED_SIGNED_MONEY_ORDER_DIRECTORY);
+		
+		clearFiles(moneyOrderDirectory);
+		clearFiles(blindedMoneyOrderDirectory);
+		clearFiles(unblindedMoneyOrderDirectory);
+		clearFiles(signedMoneyOrderDirectory);
+		clearFiles(unblindedSignedMoneyOrderDirectory);
+	}
+
+	private static void clearFiles(File directory) throws IOException {
+		if (directory.exists()) {
+			for (File file : directory.listFiles()) {
+				file.delete();
+			}
+		}
+		else {
+			directory.mkdir();
 		}
 	}
 
@@ -70,12 +99,12 @@ public class Customer {
 			randomNumberFileResult += rightHash + " " + rightSecret + " " + randomRight1 + " " + randomRight2 + "\r\n";
 		}
 		
-		Files.write(Paths.get(randomNumberDirectory + randomNumberFileName), randomNumberFileResult.getBytes());
+		Files.write(Paths.get(RANDOM_NUMBER_DIRECTORY + randomNumberFileName), randomNumberFileResult.getBytes());
 		return result;
 	}
 
 	public static void blindMoneyOrders() throws IOException {
-		File[] moneyOrders = new File(moneyOrderDirectory).listFiles();
+		File[] moneyOrders = new File(MONEY_ORDER_DIRECTORY).listFiles();
 		lastSecret = rand.nextLong();
 		long multiplier = Common.powermod(lastSecret, Bank.publicKey, Bank.modulus);
 		
@@ -103,12 +132,12 @@ public class Customer {
 				output += "\r\n";
 			}
 			
-			Files.write(Paths.get(blindedMoneyOrderDirectory + moneyOrder.getName()), output.getBytes());
+			Files.write(Paths.get(BLINDED_MONEY_ORDER_DIRECTORY + moneyOrder.getName()), output.getBytes());
 		}
 	}
 	
 	public static void unblindAllButOneMoneyOrder(long moneyOrderToNotUnblind) throws IOException {
-		File[] moneyOrders = new File(blindedMoneyOrderDirectory).listFiles();
+		File[] moneyOrders = new File(BLINDED_MONEY_ORDER_DIRECTORY).listFiles();
 		long multiplier = Common.powermod(lastSecret, -1, Bank.modulus);
 		String fileNameToNotUnblind = moneyOrderToNotUnblind + "MO.txt";
 		
@@ -141,12 +170,12 @@ public class Customer {
 				output += "\r\n";
 			}
 			
-			Files.write(Paths.get(unblindedMoneyOrderDirectory + moneyOrder.getName()), output.getBytes());
+			Files.write(Paths.get(UNBLINDED_MONEY_ORDER_DIRECTORY + moneyOrder.getName()), output.getBytes());
 		}
 	}
 
 	public static void unblindMoneyOrder() throws IOException {
-		File[] moneyOrders = new File(signedMoneyOrderDirectory).listFiles(); //should only ever be one file
+		File[] moneyOrders = new File(SIGNED_MONEY_ORDER_DIRECTORY).listFiles(); //should only ever be one file
 		long multiplier = Common.powermod(lastSecret, -1, Bank.modulus);
 		
 		for (File moneyOrder : moneyOrders) {
@@ -173,7 +202,7 @@ public class Customer {
 				output += "\r\n";
 			}
 			
-			Files.write(Paths.get(unblindedSignedMoneyOrderDirectory + moneyOrder.getName()), output.getBytes());
+			Files.write(Paths.get(UNBLINDED_SIGNED_MONEY_ORDER_DIRECTORY + moneyOrder.getName()), output.getBytes());
 		}
 	}
 
@@ -182,10 +211,10 @@ public class Customer {
 		int length = halvesToReveal.length();
 		List<RevealedIdentityStrings> list = new ArrayList<RevealedIdentityStrings>();
 		
-		File[] moneyOrders = new File(unblindedSignedMoneyOrderDirectory).listFiles(); //should only ever be one file
+		File[] moneyOrders = new File(UNBLINDED_SIGNED_MONEY_ORDER_DIRECTORY).listFiles(); //should only ever be one file
 		String moneyOrderName = moneyOrders[0].getName();
 		
-		List<String> randomNumberLines = Files.readAllLines(Paths.get(randomNumberDirectory + moneyOrderName));
+		List<String> randomNumberLines = Files.readAllLines(Paths.get(RANDOM_NUMBER_DIRECTORY + moneyOrderName));
 		
 		for (int i = 0; i < length; i++) {
 			switch (halvesToReveal.charAt(i)) {
