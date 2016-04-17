@@ -13,7 +13,7 @@ public class Driver {
 		Scanner scan = new Scanner(System.in);
 		int lastNumberOfOrders = -1;
 		String lastIdentityString = "";
-		List<Customer.RevealedIdentityStrings> pairs = null;
+		List<RevealedIdentityStrings> pairs = null;
 
 		do {
 			//Menu stuff
@@ -151,7 +151,14 @@ public class Driver {
 				//Reveal identity halves
 				case 7: {
 					System.out.println("Revealing identity halves...");
-					pairs = Customer.revealIdentityStringHalves(lastIdentityString);
+					
+					try {
+						pairs = Customer.revealIdentityStringHalves(lastIdentityString);
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						System.out.println("Error revealing identity halves.");
+					}
+					
 					System.out.println("Identity halves revealed.");
 					break;
 				}

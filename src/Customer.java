@@ -15,6 +15,7 @@ public class Customer {
 	private static String unblindedMoneyOrderDirectory = "unblindedMoneyOrders/";
 	private static String signedMoneyOrderDirectory = "signedMoneyOrder/";
 	private static String unblindedSignedMoneyOrderDirectory = "unblindedSignedMoneyOrder/";
+	private static String randomNumberDirectory = "savedRandomNumbers/";
 	private static Random rand = new Random();
 	private static long lastSecret = 0;
 
@@ -35,15 +36,16 @@ public class Customer {
 			//amount
 			fileContents += amount + "\r\n";
 			//identity strings
-			fileContents += generateIdentityStrings(ordersToCreate, identity);
+			fileContents += generateIdentityStrings(ordersToCreate, identity, i + "MO.txt");
 
 			Path filePath = Paths.get(moneyOrderDirectory + i + "MO.txt");
 			Files.write(filePath, fileContents.getBytes());
 		}
 	}
 
-	private static String generateIdentityStrings(int ordersToCreate, long identity) {
+	private static String generateIdentityStrings(int ordersToCreate, long identity, String randomNumberFileName) throws IOException {
 		String result = "";
+		String randomNumberFileResult = "";
 		
 		for (int i = 0; i < ordersToCreate; i++) {
 			//generate random string same length as message 
@@ -64,8 +66,11 @@ public class Customer {
 			long rightHash = Common.hash(randomRight1, randomRight2, rightSecret);
 
 			result += leftHash + " " + randomLeft2 + " " + rightHash + " " + randomRight2 + "\r\n";
+			randomNumberFileResult += leftHash + " " + leftSecret + " " + randomLeft1 + " " + randomLeft2 + "\r\n";
+			randomNumberFileResult += rightHash + " " + rightSecret + " " + randomRight1 + " " + randomRight2 + "\r\n";
 		}
 		
+		Files.write(Paths.get(randomNumberDirectory + randomNumberFileName), randomNumberFileResult.getBytes());
 		return result;
 	}
 
@@ -171,16 +176,49 @@ public class Customer {
 			Files.write(Paths.get(unblindedSignedMoneyOrderDirectory + moneyOrder.getName()), output.getBytes());
 		}
 	}
-	
-	public class RevealedIdentityStrings
-	{
-		public long hashResult;
-		public long secret;
-		public long randomValue1;
-		public long randomValue2;
+
+	//0 reveals left half, 1 reveals right half
+	public static List<RevealedIdentityStrings> revealIdentityStringHalves(String halvesToReveal) throws IOException {
+		int length = halvesToReveal.length();
+		List<RevealedIdentityStrings> list = new ArrayList<RevealedIdentityStrings>();
+		
+		File[] moneyOrders = new File(unblindedSignedMoneyOrderDirectory).listFiles(); //should only ever be one file
+		String moneyOrderName = moneyOrders[0].getName();
+		
+		List<String> randomNumberLines = Files.readAllLines(Paths.get(randomNumberDirectory + moneyOrderName));
+		
+		for (int i = 0; i < length; i++) {
+			switch (halvesToReveal.charAt(i)) {
+				case '0':
+				{
+					String[] individualIdentityStrings = randomNumberLines.get(2 * i).split(" ");
+					RevealedIdentityStrings identityStrings = createIdentityStringObject(individualIdentityStrings);
+					list.add(identityStrings);
+				}
+				case '1':
+				{
+					String[] individualIdentityStrings = randomNumberLines.get(2 * i + 1).split(" ");
+					RevealedIdentityStrings identityStrings = createIdentityStringObject(individualIdentityStrings);
+					list.add(identityStrings);
+				}
+				default:
+				{
+					throw new IllegalArgumentException("halvesToReveal must contain only ones and zeroes.");
+				}
+			}
+		}
+		
+		return list;
 	}
 
-	public static List<RevealedIdentityStrings> revealIdentityStringHalves(String halvesToReveal) {
-		return new LinkedList<RevealedIdentityStrings>();
+	private static RevealedIdentityStrings createIdentityStringObject(String[] individualIdentityStrings) {
+		RevealedIdentityStrings identityStrings = new RevealedIdentityStrings();
+		
+		identityStrings.hashResult = Long.parseLong(individualIdentityStrings[0]);
+		identityStrings.secret = Long.parseLong(individualIdentityStrings[1]);
+		identityStrings.randomValue1 = Long.parseLong(individualIdentityStrings[2]);
+		identityStrings.randomValue2 = Long.parseLong(individualIdentityStrings[3]);
+		
+		return identityStrings;
 	}
 }

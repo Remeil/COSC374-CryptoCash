@@ -1,5 +1,12 @@
 import java.math.BigInteger;
 
+/*
+ * Common.java
+ * Author(s): Johnathan Stiles, Edward Snyr
+ * 
+ * Provides common methods used in several classes.
+ */
+
 public class Common {
 	private Common() {
 		
