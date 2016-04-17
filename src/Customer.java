@@ -1,3 +1,4 @@
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.*;
 import java.util.*;
@@ -43,30 +44,58 @@ public class Customer {
 		
 		for (int i = 0; i < ordersToCreate; i++) {
 			//generate random string same length as message 
-			long rsi = rand.nextLong();
+			long rightSecret = rand.nextLong();
 			//generate secret string based off identity and message
-			long ssi = rsi ^ identity;
+			long leftSecret = rightSecret ^ identity;
 
 			//generate two random numbers for left half
-			long rc1l = rand.nextLong();
-			long rc2l = rand.nextLong();
+			long randomLeft1 = rand.nextLong();
+			long randomLeft2 = rand.nextLong();
 
-			long leftHash = Common.hash(rc1l, rc2l, ssi);
+			long leftHash = Common.hash(randomLeft1, randomLeft2, leftSecret);
 
 			//generate two random numbers for right half
-			long rc1r = rand.nextLong();
-			long rc2r = rand.nextLong();
+			long randomRight1 = rand.nextLong();
+			long randomRight2 = rand.nextLong();
 
-			long rightHash = Common.hash(rc1r, rc2r, rsi);
+			long rightHash = Common.hash(randomRight1, randomRight2, rightSecret);
 
-			result += leftHash + " " + rc2l + " " + rightHash + " " + rc2r + "\r\n";
+			result += leftHash + " " + randomLeft2 + " " + rightHash + " " + randomRight2 + "\r\n";
 		}
 		
 		return result;
 	}
 
-	public static void blindMoneyOrders() {
-
+	public static void blindMoneyOrders() throws IOException {
+		File[] moneyOrders = new File(moneyOrderDirectory).listFiles();
+		long multiplier = Common.powermod(rand.nextLong(), Bank.publicKey, Bank.modulus);
+		
+		for (File moneyOrder : moneyOrders) {
+			List<String> moneyOrderLines = Files.readAllLines(Paths.get(moneyOrder.getAbsolutePath()));
+			String output = "";
+			
+			//Line 1 is the uniqueness string
+			long uniquenessString = Long.parseLong(moneyOrderLines.get(0));
+			output += ((uniquenessString * multiplier) % Bank.modulus) + "\r\n";
+			
+			//Line 2 is the amount
+			long amount = (long) (Double.parseDouble(moneyOrderLines.get(1)) * 100);
+			output += ((amount * multiplier) % Bank.modulus) / 100.0 + "\r\n";
+			
+			//Line 3+ are the identity strings
+			for (int i = 2; i < moneyOrderLines.size(); i++) {
+				String[] identityStrings = moneyOrderLines.get(i).split(" ");
+				
+				for (String identityString : identityStrings) {
+					long idString = Long.parseLong(identityString);
+					output += ((idString * multiplier) % Bank.modulus) + " ";
+				}
+				
+				output += "\r\n";
+			}
+			
+			Files.write(Paths.get(blindedMoneyOrderDirectory + moneyOrder.getName()), output.getBytes());
+		}
 	}
 
 	public static void unblindMoneyOrder() {

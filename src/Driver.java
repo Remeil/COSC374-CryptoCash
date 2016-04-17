@@ -25,9 +25,8 @@ public class Driver {
 			System.out.println("6) Merchant: Request identity halves");
 			System.out.println("7) Customer: Reveal identity halves");
 			System.out.println("8) Bank: Verify valid payment");
-			System.out.println("9) Automatic: Go through the entire process automatically.");
-			System.out.println("10) Seed PRNGs");
-			System.out.println("11) Exit");
+			System.out.println("9) Seed PRNGs");
+			System.out.println("10) Exit");
 
 			int input = -1;
 			
@@ -83,7 +82,12 @@ public class Driver {
 				//Blind money orders
 				case 2: {
 					System.out.println("Blinding money orders...");
-					Customer.blindMoneyOrders();
+					try {
+						Customer.blindMoneyOrders();
+					}
+					catch (IOException e) {
+						System.out.println("Error blinding money orders.");
+					}
 					System.out.println("Done blinding money orders.");
 					break;
 				}
@@ -157,17 +161,13 @@ public class Driver {
 					}
 					break;
 				}
-				//Automatic
-				case 9: {
-					break;
-				}
 				//Seed PRNGs
-				case 10: {
+				case 9: {
 					
 					break;
 				}
 				//Exit
-				case 11: {
+				case 10: {
 					done = true;
 					break;
 				}
