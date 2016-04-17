@@ -13,6 +13,7 @@ public class Driver {
 		Scanner scan = new Scanner(System.in);
 		int lastNumberOfOrders = -1;
 		String lastIdentityString = "";
+		List<Customer.RevealedIdentityStrings> pairs = null;
 
 		do {
 			//Menu stuff
@@ -121,7 +122,11 @@ public class Driver {
 				//Unblind money orders
 				case 4: {
 					System.out.println("Unblinding money order...");
-					Customer.unblindMoneyOrder();
+					try {
+						Customer.unblindMoneyOrder();
+					} catch (IOException e) {
+						System.out.println("Error unblinding money order.");
+					}
 					System.out.println("Money order unblinded.");
 					break;
 				}
@@ -146,14 +151,14 @@ public class Driver {
 				//Reveal identity halves
 				case 7: {
 					System.out.println("Revealing identity halves...");
-					List<Customer.RevealedIdentityStrings> pairs = Customer.revealIdentityStringHalves(lastIdentityString);
+					pairs = Customer.revealIdentityStringHalves(lastIdentityString);
 					System.out.println("Identity halves revealed.");
 					break;
 				}
 				//Verify payment
 				case 8: {
 					System.out.println("Verifying payment...");
-					if (Bank.verifyMerchantMoneyOrder()) {
+					if (Bank.verifyMerchantMoneyOrder(pairs)) {
 						System.out.println("Payment verified.");
 					}
 					else {
@@ -163,6 +168,34 @@ public class Driver {
 				}
 				//Seed PRNGs
 				case 9: {
+					boolean success = false;
+					
+					do {
+						try {
+							System.out.print("Enter seed for Customer: ");
+							Customer.seedPrng(scan.nextLong());
+							success = true;
+						}
+						catch (InputMismatchException e) {}
+					} while (!success);
+					
+					do {
+						try {
+							System.out.print("Enter seed for Merchant: ");
+							Merchant.seedPrng(scan.nextLong());
+							success = true;
+						}
+						catch (InputMismatchException e) {}
+					} while (!success);
+					
+					do {
+						try {
+							System.out.print("Enter seed for Bank: ");
+							Bank.seedPrng(scan.nextLong());
+							success = true;
+						}
+						catch (InputMismatchException e) {}
+					} while (!success);
 					
 					break;
 				}

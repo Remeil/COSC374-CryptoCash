@@ -12,7 +12,9 @@ import java.util.*;
 public class Customer {
 	private static String moneyOrderDirectory = "moneyOrders/";
 	private static String blindedMoneyOrderDirectory = "blindedMoneyOrders/";
+	private static String unblindedMoneyOrderDirectory = "unblindedMoneyOrders/";
 	private static String signedMoneyOrderDirectory = "signedMoneyOrder/";
+	private static String unblindedSignedMoneyOrderDirectory = "unblindedSignedMoneyOrder/";
 	private static Random rand = new Random();
 	private static long lastSecret = 0;
 
@@ -99,13 +101,75 @@ public class Customer {
 			Files.write(Paths.get(blindedMoneyOrderDirectory + moneyOrder.getName()), output.getBytes());
 		}
 	}
-
-	public static void unblindMoneyOrder(long moneyOrder) {
-		
-	}
 	
-	public static void unblindMoneyOrder() {
+	public static void unblindAllButOneMoneyOrder(long moneyOrderToNotUnblind) throws IOException {
+		File[] moneyOrders = new File(blindedMoneyOrderDirectory).listFiles();
+		long multiplier = Common.powermod(lastSecret, -1, Bank.modulus);
+		String fileNameToNotUnblind = moneyOrderToNotUnblind + "MO.txt";
 		
+		for (File moneyOrder : moneyOrders) {
+			//Skip over the file that we don't want to unblind.
+			if (moneyOrder.getName().equals(fileNameToNotUnblind)) {
+				continue;
+			}
+			
+			List<String> moneyOrderLines = Files.readAllLines(Paths.get(moneyOrder.getAbsolutePath()));
+			String output = "";
+			
+			//Line 1 is the uniqueness string
+			long uniquenessString = Long.parseLong(moneyOrderLines.get(0));
+			output += ((uniquenessString * multiplier) % Bank.modulus) + "\r\n";
+			
+			//Line 2 is the amount
+			long amount = (long) (Double.parseDouble(moneyOrderLines.get(1)) * 100);
+			output += ((amount * multiplier) % Bank.modulus) / 100.0 + "\r\n";
+			
+			//Line 3+ are the identity strings
+			for (int i = 2; i < moneyOrderLines.size(); i++) {
+				String[] identityStrings = moneyOrderLines.get(i).split(" ");
+				
+				for (String identityString : identityStrings) {
+					long idString = Long.parseLong(identityString);
+					output += ((idString * multiplier) % Bank.modulus) + " ";
+				}
+				
+				output += "\r\n";
+			}
+			
+			Files.write(Paths.get(unblindedMoneyOrderDirectory + moneyOrder.getName()), output.getBytes());
+		}
+	}
+
+	public static void unblindMoneyOrder() throws IOException {
+		File[] moneyOrders = new File(signedMoneyOrderDirectory).listFiles(); //should only ever be one file
+		long multiplier = Common.powermod(lastSecret, -1, Bank.modulus);
+		
+		for (File moneyOrder : moneyOrders) {
+			List<String> moneyOrderLines = Files.readAllLines(Paths.get(moneyOrder.getAbsolutePath()));
+			String output = "";
+			
+			//Line 1 is the uniqueness string
+			long uniquenessString = Long.parseLong(moneyOrderLines.get(0));
+			output += ((uniquenessString * multiplier) % Bank.modulus) + "\r\n";
+			
+			//Line 2 is the amount
+			long amount = (long) (Double.parseDouble(moneyOrderLines.get(1)) * 100);
+			output += ((amount * multiplier) % Bank.modulus) / 100.0 + "\r\n";
+			
+			//Line 3+ are the identity strings
+			for (int i = 2; i < moneyOrderLines.size(); i++) {
+				String[] identityStrings = moneyOrderLines.get(i).split(" ");
+				
+				for (String identityString : identityStrings) {
+					long idString = Long.parseLong(identityString);
+					output += ((idString * multiplier) % Bank.modulus) + " ";
+				}
+				
+				output += "\r\n";
+			}
+			
+			Files.write(Paths.get(unblindedSignedMoneyOrderDirectory + moneyOrder.getName()), output.getBytes());
+		}
 	}
 	
 	public class RevealedIdentityStrings
