@@ -10,12 +10,12 @@ import java.util.*;
  * This class provides all the money order operations from the customer.
  */
 public class Customer {
-	private final static String MONEY_ORDER_DIRECTORY = "moneyOrders/";
-	private final static String BLINDED_MONEY_ORDER_DIRECTORY = "blindedMoneyOrders/";
-	private final static String UNBLINDED_MONEY_ORDER_DIRECTORY = "unblindedMoneyOrders/";
-	private final static String SIGNED_MONEY_ORDER_DIRECTORY = "signedMoneyOrder/";
-	private final static String UNBLINDED_SIGNED_MONEY_ORDER_DIRECTORY = "unblindedSignedMoneyOrder/";
-	private final static String RANDOM_NUMBER_DIRECTORY = "savedRandomNumbers/";
+	public final static String MONEY_ORDER_DIRECTORY = "moneyOrders/";
+	public final static String BLINDED_MONEY_ORDER_DIRECTORY = "blindedMoneyOrders/";
+	public final static String UNBLINDED_MONEY_ORDER_DIRECTORY = "unblindedMoneyOrders/";
+	public final static String SIGNED_MONEY_ORDER_DIRECTORY = "signedMoneyOrder/";
+	public final static String UNBLINDED_SIGNED_MONEY_ORDER_DIRECTORY = "unblindedSignedMoneyOrder/";
+	public final static String RANDOM_NUMBER_DIRECTORY = "savedRandomNumbers/";
 	private static Random rand = new Random();
 	private static long lastSecret = 0;
 
