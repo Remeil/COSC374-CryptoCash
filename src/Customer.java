@@ -103,9 +103,9 @@ public class Customer {
 		return result;
 	}
 
-	public static void blindMoneyOrders() throws IOException {
+	public static long blindMoneyOrders() throws IOException {
 		File[] moneyOrders = new File(MONEY_ORDER_DIRECTORY).listFiles();
-		lastSecret = rand.nextLong();
+		long secret = rand.nextLong();
 		long multiplier = Common.powermod(lastSecret, Bank.publicKey, Bank.modulus);
 		
 		for (File moneyOrder : moneyOrders) {
@@ -134,6 +134,8 @@ public class Customer {
 			
 			Files.write(Paths.get(BLINDED_MONEY_ORDER_DIRECTORY + moneyOrder.getName()), output.getBytes());
 		}
+		
+		return secret;
 	}
 	
 	public static void unblindAllButOneMoneyOrder(long moneyOrderToNotUnblind) throws IOException {

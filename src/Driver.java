@@ -13,8 +13,8 @@ public class Driver {
 		Scanner scan = new Scanner(System.in);
 		int lastNumberOfOrders = -1;
 		String lastIdentityString = "";
-		List<RevealedIdentityStrings> pairs = null;
-
+		long blindingK = -1;
+		
 		do {
 			//Menu stuff
 			System.out.println("*** Main Menu ***");
@@ -84,7 +84,7 @@ public class Driver {
 				case 2: {
 					System.out.println("Blinding money orders...");
 					try {
-						Customer.blindMoneyOrders();
+						blindingK = Customer.blindMoneyOrders();
 					}
 					catch (IOException e) {
 						System.out.println("Error blinding money orders.");
@@ -95,7 +95,7 @@ public class Driver {
 				//Verify and sign money orders
 				case 3: {
 					int orderToSign = -2;
-					boolean confirmed = true;;
+					boolean confirmed = true;
 					do {
 						try {
 							confirmed = true;
@@ -103,7 +103,7 @@ public class Driver {
 							orderToSign = scan.nextInt();
 							
 							if (orderToSign > lastNumberOfOrders) {
-								System.out.print("The order to sign appears to fall out of the range of possible orders. Are you sure you want to choose this order (Y/N): ");
+								System.out.print("The money order to sign appears to fall out of the range of possible orders. Are you sure you want to choose this order (Y/N): ");
 								char response = scan.next().toUpperCase().charAt(0);
 								confirmed = response == 'Y';
 							}
@@ -112,11 +112,14 @@ public class Driver {
 					} while (orderToSign < -1 && confirmed);
 					
 					System.out.println("Verifying and signing money order " + orderToSign + "...");
-					if (Bank.verifyAndSignMoneyOrders(orderToSign)) {
-						System.out.println("Money order signed.");
-					} else {
-						System.out.println("ERROR: Invalid money order.");
+					try {
+						if (Bank.verifyAndSignMoneyOrders(orderToSign, blindingK)) {
+							System.out.println("Money order signed.");
+						} else {
+							System.out.println("ERROR: Invalid money order.");
+						}
 					}
+					catch (IOException e) {}
 					break;
 				}
 				//Unblind money orders
@@ -134,11 +137,15 @@ public class Driver {
 				case 5: {
 					System.out.println("Verifying bank signature...");
 					if (Merchant.verifyBankSignature(Bank.publicKey, Bank.modulus)) {
-						System.out.println("Bank signature appears to be valid.");
+					try {
+						if (Merchant.verifyBankSignature(blindingK)) {
+							System.out.println("Bank signature appears to be valid.");
+						}
+						else {
+							System.out.println("ERROR: Bank signature appears to be invalid");
+						}
 					}
-					else {
-						System.out.println("ERROR: Bank signature appears to be invalid");
-					}
+					catch (IOException e) {}
 					break;
 				}
 				//Request identity halves
@@ -151,20 +158,14 @@ public class Driver {
 				//Reveal identity halves
 				case 7: {
 					System.out.println("Revealing identity halves...");
-					
-					try {
-						pairs = Customer.revealIdentityStringHalves(lastIdentityString);
-					} catch (IOException e) {
-						System.out.println("Error revealing identity halves.");
-					}
-					
+					List<RevealedIdentityStrings> pairs = Customer.revealIdentityStringHalves(lastIdentityString);
 					System.out.println("Identity halves revealed.");
 					break;
 				}
 				//Verify payment
 				case 8: {
 					System.out.println("Verifying payment...");
-					if (Bank.verifyMerchantMoneyOrder(pairs)) {
+					if (Bank.verifyMerchantMoneyOrder()) {
 						System.out.println("Payment verified.");
 					}
 					else {
@@ -174,34 +175,6 @@ public class Driver {
 				}
 				//Seed PRNGs
 				case 9: {
-					boolean success = false;
-					
-					do {
-						try {
-							System.out.print("Enter seed for Customer: ");
-							Customer.seedPrng(scan.nextLong());
-							success = true;
-						}
-						catch (InputMismatchException e) {}
-					} while (!success);
-					
-					do {
-						try {
-							System.out.print("Enter seed for Merchant: ");
-							Merchant.seedPrng(scan.nextLong());
-							success = true;
-						}
-						catch (InputMismatchException e) {}
-					} while (!success);
-					
-					do {
-						try {
-							System.out.print("Enter seed for Bank: ");
-							Bank.seedPrng(scan.nextLong());
-							success = true;
-						}
-						catch (InputMismatchException e) {}
-					} while (!success);
 					
 					break;
 				}
