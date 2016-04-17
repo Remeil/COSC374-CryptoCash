@@ -155,7 +155,6 @@ public class Driver {
 					try {
 						pairs = Customer.revealIdentityStringHalves(lastIdentityString);
 					} catch (IOException e) {
-						// TODO Auto-generated catch block
 						System.out.println("Error revealing identity halves.");
 					}
 					
