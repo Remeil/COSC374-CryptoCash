@@ -70,12 +70,15 @@ public class Driver {
 						catch (InputMismatchException e) {}
 					} while (identity < 0);
 
+					
 					System.out.println("Creating money orders...");
+					
 					try {
 						Customer.createMoneyOrders(amount, ordersToCreate, identity);
 					} catch (IOException e) {
 						System.out.println("Error creating money orders.");
 					}
+					
 					System.out.println("Done creating money orders.");
 					lastNumberOfOrders = ordersToCreate;
 					break;
@@ -180,7 +183,35 @@ public class Driver {
 				}
 				//Seed PRNGs
 				case 9: {
-					
+					boolean success = false;
+
+					do {
+						try {
+							System.out.print("Enter seed for Customer: ");
+							Customer.seedPrng(scan.nextLong());
+							success = true;
+						}
+						catch (InputMismatchException e) {}
+					} while (!success);
+
+					do {
+						try {
+							System.out.print("Enter seed for Merchant: ");
+							Merchant.seedPrng(scan.nextLong());
+							success = true;
+						}
+						catch (InputMismatchException e) {}
+					} while (!success);
+
+					do {
+						try {
+							System.out.print("Enter seed for Bank: ");
+							Bank.seedPrng(scan.nextLong());
+							success = true;
+						}
+						catch (InputMismatchException e) {}
+					} while (!success);
+
 					break;
 				}
 				//Exit
