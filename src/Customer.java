@@ -1,5 +1,6 @@
 import java.io.File;
 import java.io.IOException;
+import java.math.BigInteger;
 import java.nio.file.*;
 import java.util.*;
 
@@ -36,7 +37,7 @@ public class Customer {
 			String fileContents = "";
 
 			//unique identifier
-			fileContents += rand.nextLong() + "\r\n";
+			fileContents += (rand.nextLong() % Bank.modulus) + "\r\n";
 			//amount
 			fileContents += amount + "\r\n";
 			//identity strings
@@ -80,19 +81,19 @@ public class Customer {
 		
 		for (int i = 0; i < ordersToCreate; i++) {
 			//generate random string same length as message 
-			long rightSecret = rand.nextLong();
+			long rightSecret = (rand.nextLong() % Bank.modulus);
 			//generate secret string based off identity and message
 			long leftSecret = rightSecret ^ identity;
 
 			//generate two random numbers for left half
-			long randomLeft1 = rand.nextLong();
-			long randomLeft2 = rand.nextLong();
+			long randomLeft1 = (rand.nextLong() % Bank.modulus);
+			long randomLeft2 = (rand.nextLong() % Bank.modulus);
 
 			long leftHash = Common.hash(randomLeft1, randomLeft2, leftSecret);
 
 			//generate two random numbers for right half
-			long randomRight1 = rand.nextLong();
-			long randomRight2 = rand.nextLong();
+			long randomRight1 = (rand.nextLong() % Bank.modulus);
+			long randomRight2 = (rand.nextLong() % Bank.modulus);
 
 			long rightHash = Common.hash(randomRight1, randomRight2, rightSecret);
 
@@ -107,8 +108,9 @@ public class Customer {
 
 	public static long blindMoneyOrders() throws IOException {
 		File[] moneyOrders = new File(MONEY_ORDER_DIRECTORY).listFiles();
-		long secret = rand.nextLong();
+		lastSecret = rand.nextLong();
 		long multiplier = Common.powermod(lastSecret, Bank.publicKey, Bank.modulus);
+		
 		
 		for (File moneyOrder : moneyOrders) {
 			List<String> moneyOrderLines = Files.readAllLines(Paths.get(moneyOrder.getAbsolutePath()));
@@ -137,7 +139,7 @@ public class Customer {
 			Files.write(Paths.get(BLINDED_MONEY_ORDER_DIRECTORY + moneyOrder.getName()), output.getBytes());
 		}
 		
-		return secret;
+		return lastSecret;
 	}
 	
 	public static void unblindAllButOneMoneyOrder(long moneyOrderToNotUnblind) throws IOException {

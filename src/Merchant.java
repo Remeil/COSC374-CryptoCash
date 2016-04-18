@@ -79,8 +79,4 @@ public class Merchant {
 		}
 		return randReveal;
 	}
-
-	public static void storeRevealedIdentityStrings(List<Long> identityStrings) {
-		
-	}
 }
