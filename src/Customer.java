@@ -30,6 +30,7 @@ public class Customer {
 	}
 
 	
+	//Create ordersToCreate money orders, for the given amount using the given identity.
 	public static void createMoneyOrders(double amount, int ordersToCreate, long identity) throws IOException {
 		clearAllFiles();
 		
@@ -48,6 +49,7 @@ public class Customer {
 		}
 	}
 
+	//Empty working directories
 	private static void clearAllFiles() throws IOException {
 		File moneyOrderDirectory = new File(MONEY_ORDER_DIRECTORY);
 		File blindedMoneyOrderDirectory = new File(BLINDED_MONEY_ORDER_DIRECTORY);
@@ -64,6 +66,7 @@ public class Customer {
 		clearFiles(uniquenessStringsDirectory);
 	}
 
+	//Empty a single directory
 	private static void clearFiles(File directory) throws IOException {
 		if (directory.exists()) {
 			for (File file : directory.listFiles()) {
@@ -75,6 +78,7 @@ public class Customer {
 		}
 	}
 
+	//Create and generate ordersToCreate identity strings, based of the given identity, and save it in the given randomNumberFileName
 	private static String generateIdentityStrings(int ordersToCreate, long identity, String randomNumberFileName) throws IOException {
 		String result = "";
 		String randomNumberFileResult = "";
@@ -106,11 +110,11 @@ public class Customer {
 		return result;
 	}
 
+	//Blind all money orders, and place them in a new folder for processing.
 	public static long blindMoneyOrders() throws IOException {
 		File[] moneyOrders = new File(MONEY_ORDER_DIRECTORY).listFiles();
 		lastSecret = rand.nextLong();
 		long multiplier = Common.powermod(lastSecret, Bank.publicKey, Bank.modulus);
-		
 		
 		for (File moneyOrder : moneyOrders) {
 			List<String> moneyOrderLines = Files.readAllLines(Paths.get(moneyOrder.getAbsolutePath()));
@@ -142,6 +146,7 @@ public class Customer {
 		return lastSecret;
 	}
 	
+	//Unblind all but one money order for the bank to inspect
 	public static void unblindAllButOneMoneyOrder(long moneyOrderToNotUnblind) throws IOException {
 		File[] moneyOrders = new File(BLINDED_MONEY_ORDER_DIRECTORY).listFiles();
 		long multiplier = Common.powermod(lastSecret, -1, Bank.modulus);
@@ -180,6 +185,7 @@ public class Customer {
 		}
 	}
 
+	//Unblind a signed money order so we can use it.
 	public static void unblindMoneyOrder() throws IOException {
 		File[] moneyOrders = new File(SIGNED_MONEY_ORDER_DIRECTORY).listFiles(); //should only ever be one file
 		long multiplier = Common.powermod(lastSecret, -1, Bank.modulus);
@@ -212,7 +218,7 @@ public class Customer {
 		}
 	}
 
-	//0 reveals left half, 1 reveals right half
+	//Reveal identity string halves of our money order, based on a inputted bit string.
 	public static List<RevealedIdentityStrings> revealIdentityStringHalves(String halvesToReveal) throws IOException {
 		int length = halvesToReveal.length();
 		List<RevealedIdentityStrings> list = new ArrayList<RevealedIdentityStrings>();
@@ -246,6 +252,7 @@ public class Customer {
 		return list;
 	}
 
+	//Generate an identity string object from the inputted string.
 	private static RevealedIdentityStrings createIdentityStringObject(String[] individualIdentityStrings) {
 		RevealedIdentityStrings identityStrings = new RevealedIdentityStrings();
 		

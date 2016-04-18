@@ -102,7 +102,7 @@ public class Driver {
 					do {
 						try {
 							confirmed = true;
-							System.out.print("Enter the number of the money order to sign (-1 for random): ");
+							System.out.print("Enter the number of the money order to sign: ");
 							orderToSign = scan.nextInt();
 							
 							if (orderToSign > lastNumberOfOrders) {
