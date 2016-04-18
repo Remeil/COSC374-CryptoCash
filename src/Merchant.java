@@ -6,9 +6,10 @@ import java.util.*;
 
 /*
  * Merchant.java
- * Author(s): 
+ * Author(s): Edward Snyr
  * 
- * A file that does stuff.
+ * The merchant class verifies the signature of the bank on a money order
+ * and decides which identity strings to be revealed.
  */
 public class Merchant {
 	
@@ -18,10 +19,17 @@ public class Merchant {
 
 	}
 
+	/*
+	 * Seeds the random number generator.
+	 */
 	public static void seedPrng(long seed) {
 		rand.setSeed(seed);
 	}
 
+	/*
+	 * Verifies the banks signature by unblinding the money order. Creates the
+	 * unblinded signed money order.
+	 */
 	public static boolean verifyBankSignature(long givenKey) throws IOException {
 		File[] moneyOrders = new File(Customer.SIGNED_MONEY_ORDER_DIRECTORY).listFiles();
 		long multiplier = Common.powermod(givenKey, Bank.publicKey, Bank.modulus);
@@ -50,11 +58,17 @@ public class Merchant {
 				output += "\r\n";
 			}
 			
-			//Files.write(Paths.get(blindedMoneyOrderDirectory + moneyOrder.getName()), output.getBytes());
+			Files.write(Paths.get(Customer.UNBLINDED_SIGNED_MONEY_ORDER_DIRECTORY + moneyOrder.getName()), output.getBytes());
+			
 		}
+		
+		
 		return true;
 	}
 
+	/*
+	 * Randomly determines which halves of the identity string to reveal.
+	 */
 	public static String generateRevealIdentityString(long stringLength) {
 		String randReveal = "";
 		for(int i = 0; i < stringLength; i++) {
@@ -67,6 +81,6 @@ public class Merchant {
 	}
 
 	public static void storeRevealedIdentityStrings(List<Long> identityStrings) {
-
+		
 	}
 }

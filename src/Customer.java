@@ -53,12 +53,14 @@ public class Customer {
 		File unblindedMoneyOrderDirectory = new File(UNBLINDED_MONEY_ORDER_DIRECTORY);
 		File signedMoneyOrderDirectory = new File(SIGNED_MONEY_ORDER_DIRECTORY);
 		File unblindedSignedMoneyOrderDirectory = new File(UNBLINDED_SIGNED_MONEY_ORDER_DIRECTORY);
+		File uniquenessStringsDirectory = new File(Bank.UNIQUENESS_STRINGS_DIRECTORY);
 		
 		clearFiles(moneyOrderDirectory);
 		clearFiles(blindedMoneyOrderDirectory);
 		clearFiles(unblindedMoneyOrderDirectory);
 		clearFiles(signedMoneyOrderDirectory);
 		clearFiles(unblindedSignedMoneyOrderDirectory);
+		clearFiles(uniquenessStringsDirectory);
 	}
 
 	private static void clearFiles(File directory) throws IOException {
