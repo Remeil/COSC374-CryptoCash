@@ -14,7 +14,7 @@ public class Driver {
 		int lastNumberOfOrders = -1;
 		String lastIdentityString = "";
 		long blindingK = -1;
-		
+
 		do {
 			//Menu stuff
 			System.out.println("*** Main Menu ***");
@@ -30,7 +30,7 @@ public class Driver {
 			System.out.println("10) Exit");
 
 			int input = -1;
-			
+
 			do {
 				try {
 					System.out.print("Enter Selection: ");
@@ -101,7 +101,7 @@ public class Driver {
 							confirmed = true;
 							System.out.print("Enter the number of the money order to sign (-1 for random): ");
 							orderToSign = scan.nextInt();
-							
+
 							if (orderToSign > lastNumberOfOrders) {
 								System.out.print("The money order to sign appears to fall out of the range of possible orders. Are you sure you want to choose this order (Y/N): ");
 								char response = scan.next().toUpperCase().charAt(0);
@@ -110,7 +110,7 @@ public class Driver {
 						}
 						catch (InputMismatchException e) {}
 					} while (orderToSign < -1 && confirmed);
-					
+
 					System.out.println("Verifying and signing money order " + orderToSign + "...");
 					try {
 						if (Bank.verifyAndSignMoneyOrders(orderToSign, blindingK)) {
@@ -136,7 +136,6 @@ public class Driver {
 				//Verify bank signature
 				case 5: {
 					System.out.println("Verifying bank signature...");
-					if (Merchant.verifyBankSignature(Bank.publicKey, Bank.modulus)) {
 					try {
 						if (Merchant.verifyBankSignature(blindingK)) {
 							System.out.println("Bank signature appears to be valid.");
@@ -158,7 +157,11 @@ public class Driver {
 				//Reveal identity halves
 				case 7: {
 					System.out.println("Revealing identity halves...");
-					List<RevealedIdentityStrings> pairs = Customer.revealIdentityStringHalves(lastIdentityString);
+					try {
+						List<RevealedIdentityStrings> pairs = Customer.revealIdentityStringHalves(lastIdentityString);
+					} catch (IOException e) {
+						System.out.println("Failed to reveal identity havles.");
+					}
 					System.out.println("Identity halves revealed.");
 					break;
 				}
@@ -175,7 +178,35 @@ public class Driver {
 				}
 				//Seed PRNGs
 				case 9: {
-					
+					boolean success = false;
+
+					do {
+						try {
+							System.out.print("Enter seed for Customer: ");
+							Customer.seedPrng(scan.nextLong());
+							success = true;
+						}
+						catch (InputMismatchException e) {}
+					} while (!success);
+
+					do {
+						try {
+							System.out.print("Enter seed for Merchant: ");
+							Merchant.seedPrng(scan.nextLong());
+							success = true;
+						}
+						catch (InputMismatchException e) {}
+					} while (!success);
+
+					do {
+						try {
+							System.out.print("Enter seed for Bank: ");
+							Bank.seedPrng(scan.nextLong());
+							success = true;
+						}
+						catch (InputMismatchException e) {}
+					} while (!success);
+
 					break;
 				}
 				//Exit
@@ -187,10 +218,10 @@ public class Driver {
 					throw new AssertionError("Impossible state");
 				}
 			}
-			
+
 			System.out.println();
 		} while (!done);
-		
+
 		scan.close();
 	}
 }
